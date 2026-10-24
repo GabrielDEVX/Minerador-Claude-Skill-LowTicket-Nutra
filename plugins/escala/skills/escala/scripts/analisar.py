@@ -126,7 +126,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pasta")
     ap.add_argument("--ultima", action="store_true")
-    ap.add_argument("--pagina", help="nome ou page_id")
+    ap.add_argument("--pagina", help="número do ranking (ex.: 3), nome da página ou page_id")
     a = ap.parse_args()
     cfg, _ = carregar_config()
     if a.pasta:
@@ -146,12 +146,19 @@ def main():
     print(f"MINERACAO: {pasta}")
     if not a.pagina:
         print("PAGINAS:")
-        print(json.dumps([{"#": i + 1, "pagina": r.get("pagina"), "page_id": r.get("page_id"), "sinais": r.get("sinais")}
+        print(json.dumps([{"#": i + 1, "pagina": r.get("pagina"), "page_id": r.get("page_id"),
+                           "ativos": r.get("ativos_pagina"), "dias": r.get("dias_max"),
+                           "tipo_oferta": r.get("tipo_oferta"), "precos": r.get("precos"),
+                           "plataforma": r.get("plataforma"), "sinais": r.get("sinais"),
+                           "link_biblioteca": r.get("link_biblioteca")}
                           for i, r in enumerate(ranking[:15])], ensure_ascii=False, indent=1))
         return
-    res = analisar_pagina(anuncios, ranking, a.pagina, cfg)
+    from comum import escolher_oferta
+    alvo, linha = escolher_oferta(ranking, a.pagina)
+    res = analisar_pagina(anuncios, ranking, alvo, cfg)
     if not res:
-        print(f"PAGINA_NAO_ENCONTRADA: '{a.pagina}' não está nesta mineração.")
+        print(f"PAGINA_NAO_ENCONTRADA: '{a.pagina}' não está nesta mineração. "
+              f"Escolha pelo número do ranking (1 a {len(ranking)}) ou pelo nome da página.")
         sys.exit(3)
     print(json.dumps(res, ensure_ascii=False, indent=1))
 

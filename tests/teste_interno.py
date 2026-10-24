@@ -617,6 +617,24 @@ def t_produto():
     checar("concorrentes_parecidos" in an["metricas"] and an["copies_top"], "mede concorrência e traz copies de referência")
     out = sh("analisar", "--pasta", str(pasta), "--pagina", "Inexistente XYZ")
     checar("PAGINA_NAO_ENCONTRADA" in out, "avisa quando a página não está na mineração")
+    # 3a — escolher a oferta PELO NÚMERO do ranking (sem minerar de novo)
+    import csv as _csv, comum as _cm
+    with open(pasta / "ranking.csv", encoding="utf-8") as _f:
+        _rk = list(_csv.DictReader(_f))
+    _ident, _linha = _cm.escolher_oferta(_rk, "1")
+    checar(_linha is _rk[0] and _ident in (_rk[0].get("page_id"), _rk[0].get("pagina")),
+           "escolher_oferta: número 1 aponta para a 1ª do ranking")
+    checar(_cm.escolher_oferta(_rk, "#1")[1] is _rk[0], "escolher_oferta: aceita '#1'")
+    _pid = next((r.get("page_id") for r in _rk if (r.get("page_id") or "").isdigit() and len(r.get("page_id")) > 2), None)
+    if _pid:
+        checar(_cm.escolher_oferta(_rk, _pid)[0] == _pid, "escolher_oferta: page_id longo não vira posição")
+    out = sh("analisar", "--pasta", str(pasta), "--pagina", "1")
+    jj = json.loads(out[out.index("{"):])
+    checar(jj.get("pagina") == _rk[0].get("pagina"), "analisar --pagina 1 mede a 1ª oferta minerada")
+    out = sh("analisar", "--pasta", str(pasta))
+    plist = json.loads(out[out.index("["):])
+    checar(plist and all(k in plist[0] for k in ("#", "ativos", "tipo_oferta", "precos", "plataforma")),
+           "menu numerado traz ativos/tipo/preços/plataforma para escolher")
     # 3b — criar produto
     out = sh("produto", "novo", "Meu Pack de Teste")
     checar("CRIADO" in out and "SLUG: meu-pack-de-teste" in out, "cria a ficha do produto")
@@ -709,6 +727,8 @@ def t_produto():
     checar("FALTA_PREENCHER" in out, "clonar: aponta o que o Claude ainda preenche")
     out = sh("clonar", "--pasta", str(pasta2), "--pagina", "Inexistente", "--nome", "X")
     checar("PAGINA_NAO_ENCONTRADA" in out, "clonar: avisa quando a página não existe")
+    out = sh("clonar", "--pasta", str(pasta2), "--pagina", "1", "--nome", "Clone Por Numero")
+    checar("CLONADO" in out and "SLUG: clone-por-numero" in out, "clonar: aceita o número do ranking (sem minerar de novo)")
 
     # BREAKDOWN de copy
     copy = ("Cansado de tentar de tudo e nada funcionar? Com o Metodo Caixa Preta voce resolve em 7 dias. "

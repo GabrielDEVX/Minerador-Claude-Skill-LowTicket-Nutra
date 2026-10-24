@@ -295,6 +295,32 @@ def _sem_acento(s):
     return "".join(c for c in unicodedata.normalize("NFD", (s or "").lower()) if unicodedata.category(c) != "Mn")
 
 
+def escolher_oferta(ranking, alvo):
+    """Resolve o 'alvo' que o usuário digitou para uma oferta DO RANKING já minerado.
+
+    alvo pode ser:
+      - o NÚMERO da posição no ranking ("3", "#3", "oferta 3")  → pega ranking[2]
+      - o nome da página ("Chef Ana") ou o page_id ("5012...")  → passa direto
+
+    Retorna (identificador, linha) onde identificador é o page_id (ou o nome) que o
+    analisar_pagina sabe localizar, e linha é o dict do ranking (ou None).
+    Assim ninguém precisa minerar de novo: escolhe pelo número do que já saiu.
+    """
+    bruto = str(alvo or "").strip()
+    so_num = "".join(c for c in bruto if c.isdigit())
+    # posição no ranking: número curto (1–2 dígitos) dentro do tamanho do ranking.
+    # page_id do Facebook é longo (10+ dígitos), então não colide com a posição.
+    if so_num and bruto.lstrip("#").strip().lower().replace("oferta", "").strip().isdigit():
+        n = int(so_num)
+        if len(so_num) <= 2 and ranking and 1 <= n <= len(ranking):
+            linha = ranking[n - 1]
+            return (linha.get("page_id") or linha.get("pagina") or bruto), linha
+    # nome ou page_id direto
+    linha = next((r for r in ranking if r.get("page_id") == bruto
+                  or _sem_acento(r.get("pagina") or "") == _sem_acento(bruto)), None)
+    return bruto, linha
+
+
 def _dominio_base(link):
     from urllib.parse import urlparse
     host = urlparse(link or "").netloc.lower().split(":")[0]

@@ -94,6 +94,9 @@ Os resultados ficam em `~/mineracao/` (para abrir: `open ~/mineracao`).
 
 ## Novidades
 
+**1.17.0**
+- **Modelar a oferta que você já minerou, pelo número**: depois da mineração, as opções de analisar, clonar e modelar funil agora trabalham em cima do próprio ranking que acabou de sair — sem pesquisar de novo. É só dizer o número da oferta ("analisa a 3", "clona a 2"). A listagem vem numerada e com ativos, dias, tipo, preços e plataforma, pra escolher na hora. Por padrão usa a última mineração (dá pra apontar uma anterior com `--pasta`).
+
 **1.16.0**
 - **Cérebro que aprende sozinho**: a ferramenta agora tem uma memória que fica mais esperta a cada mineração — sua e dos seus mentorados. Depois de toda busca ela aprende, sem precisar pedir: domínios/plataformas que aparecem como oferta de verdade (um domínio visto em 3+ minerações passa a ser reconhecido sozinho e melhora o filtro de link), páginas que vivem escalando e quais palavras-chave mais rendem ofertas por nicho/país. Para ver o que ela já aprendeu, é só pedir o resumo do cérebro no menu. Quanto mais se garimpa, melhor ela filtra e sugere. (É uma memória estatística que cresce com o uso — não um modelo se re-treinando.)
 

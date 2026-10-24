@@ -354,7 +354,9 @@ Depois:
 ```
   💡  ENCONTROU UMA OFERTA BOA?
   ──────────────────────────────────────────────
-  copie o nome da página ou o link do anúncio e:
+  é só dizer o NÚMERO da oferta no ranking (ex.: "analisa a 3",
+  "clona a 2") — trabalho em cima do que você acabou de minerar,
+  sem pesquisar de novo:
 
   [3]  🧪  analisar e dar nota à oferta
   [4]  🧬  clonar a oferta (gera produto + app + página + criativos)
@@ -622,6 +624,9 @@ E o bloco final:
 ```
   💡  PRÓXIMOS PASSOS
   ──────────────────────────────────────────────
+  diga o NÚMERO da oferta pra analisar/clonar o que acabou de sair
+  (ex.: "analisa a 2") — sem minerar de novo:
+
   [1]  🔁  mesmo mecanismo em outro país
   [2]  🧪  outro mecanismo da mesma categoria
   [3]  🧪  analisar e dar nota
@@ -692,17 +697,21 @@ Dois momentos: **medir** a oferta e **definir** o seu produto a partir dela.
 
 ### 3a — Medir a oferta
 
-Se o usuário colou uma página/link de uma mineração, use-a. Senão, analise a última mineração:
+**Analisar, clonar e modelar trabalham em cima das ofertas que o usuário JÁ minerou — nunca minere de novo para isso.** Por padrão usam a **última mineração** (`--ultima`); as opções do menu que aparecem depois da mineração são justamente para agir sobre aquele ranking que acabou de sair.
+
+Primeiro liste as ofertas da última mineração (vem numeradas, com ativos, dias, tipo, preços e plataforma):
 
 ```bash
 bash ${CLAUDE_SKILL_DIR}/scripts/run.sh analisar --ultima
 ```
 
-Isso lista as páginas. Para medir uma:
+Mostre ao usuário as ofertas numeradas (o `#` é o número do ranking) e peça **o número** da que ele quer. Para medir a escolhida, passe o próprio número em `--pagina`:
 
 ```bash
-bash ${CLAUDE_SKILL_DIR}/scripts/run.sh analisar --ultima --pagina "{NOME OU page_id}"
+bash ${CLAUDE_SKILL_DIR}/scripts/run.sh analisar --ultima --pagina {NÚMERO}
 ```
+
+`--pagina` aceita o **número do ranking** (ex.: `3`), o nome da página ou o page_id — o que for mais fácil. Para analisar uma mineração anterior em vez da última, troque `--ultima` por `--pasta {PASTA}`.
 
 A saída traz `nota_final` (0 a 10), `veredito` (MODELAR ≥7 / OBSERVAR / DESCARTAR), as `notas` por critério (dias rodando, anúncios ativos, criativos e variações, preço, concorrência), as `metricas` e as `copies_top`. Mostre assim:
 
@@ -741,12 +750,12 @@ Isso cria `~/mineracao/produtos/{slug}/produto.json`. Preencha com a ferramenta 
 
 Fluxo express: pega uma oferta que você minerou e, num caminho só, cria o seu produto, o entregável (área de membros), a página de vendas e os criativos. É a opção 3 + 5 + 6 + 7 encadeadas, para quem já decidiu modelar.
 
-1. Precisa de uma mineração feita. Pergunte qual oferta clonar (nome da página da última mineração, ou peça para rodar a 2 antes) e **qual o nome do novo produto** (o nome do usuário, não o do concorrente).
-2. Crie a ficha já pré-preenchida:
+1. Precisa de uma mineração feita (usa a última por padrão — **não minere de novo**). Se ainda não listou as ofertas, rode `run.sh analisar --ultima` para mostrá-las numeradas. Pergunte **o número da oferta** que ele quer clonar (ou o nome da página) e **qual o nome do novo produto** (o nome do usuário, não o do concorrente).
+2. Crie a ficha já pré-preenchida, passando o número do ranking em `--pagina`:
    ```bash
-   bash ${CLAUDE_SKILL_DIR}/scripts/run.sh clonar --ultima --pagina "{NOME DA PÁGINA}" --nome "{NOME DO SEU PRODUTO}"
+   bash ${CLAUDE_SKILL_DIR}/scripts/run.sh clonar --ultima --pagina {NÚMERO} --nome "{NOME DO SEU PRODUTO}"
    ```
-   (ou `--pasta {PASTA}` em vez de `--ultima`.) Isso lê a análise e já preenche nicho, preço, preço âncora, plataforma, cores do nicho e guarda as copies da oferta como **referência de ângulo** (campo `referencias`). A saída traz `SLUG:` e o que ficou `FALTA_PREENCHER`.
+   (`--pagina` aceita número do ranking, nome da página ou page_id; use `--pasta {PASTA}` em vez de `--ultima` para uma mineração anterior.) Isso lê a análise da **oferta já minerada** e já preenche nicho, preço, preço âncora, plataforma, cores do nicho e guarda as copies da oferta como **referência de ângulo** (campo `referencias`). A saída traz `SLUG:` e o que ficou `FALTA_PREENCHER`.
 3. Complete o `produto.json` (promessa, público, dor, mecanismo, order_bumps, bônus) com a ferramenta de edição, a partir do ângulo da referência — **com palavras suas, sem copiar a copy do concorrente**. Pergunte só o essencial (confirme preço e checkout).
 4. Gere tudo em sequência, usando as seções 5, 6 e 7:
    - escreva `conteudo.json` e rode `run.sh infoapp {slug}` (área de membros);

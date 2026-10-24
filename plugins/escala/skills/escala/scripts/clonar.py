@@ -41,7 +41,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pasta")
     ap.add_argument("--ultima", action="store_true")
-    ap.add_argument("--pagina", required=True)
+    ap.add_argument("--pagina", required=True, help="número do ranking (ex.: 3), nome da página ou page_id")
     ap.add_argument("--nome", required=True, help="nome do SEU produto (não o do concorrente)")
     a = ap.parse_args()
     cfg, _ = carregar_config()
@@ -61,9 +61,12 @@ def main():
         with open(pasta / "ranking.csv", encoding="utf-8") as f:
             ranking = list(csv.DictReader(f))
     cfg["_modo"] = "nutra" if "_nutra_" in pasta.name else "lowticket"
-    res = A.analisar_pagina(anuncios, ranking, a.pagina, cfg)
+    from comum import escolher_oferta
+    alvo, _linha = escolher_oferta(ranking, a.pagina)
+    res = A.analisar_pagina(anuncios, ranking, alvo, cfg)
     if not res:
-        print(f"PAGINA_NAO_ENCONTRADA: '{a.pagina}' não está nesta mineração.")
+        print(f"PAGINA_NAO_ENCONTRADA: '{a.pagina}' não está nesta mineração. "
+              f"Escolha pelo número do ranking (1 a {len(ranking)}) ou pelo nome da página.")
         sys.exit(3)
 
     m = res["metricas"]
